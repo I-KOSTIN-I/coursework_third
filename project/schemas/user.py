@@ -1,7 +1,7 @@
 from marshmallow import Schema, fields
 
 
-class MovieSchema(Schema):
+class UserSchema(Schema):
     id = fields.Int(required=True)
     title = fields.Str()
     description = fields.Str()
