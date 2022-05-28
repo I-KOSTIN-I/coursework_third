@@ -1,8 +1,11 @@
-from sqlalchemy.orm.scoping import scoped_session
-import json
 
-import project
+from flask import request
+from sqlalchemy import desc
+from sqlalchemy.orm.scoping import scoped_session
 from project.dao.models import Movie
+from project.config import BaseConfig
+
+limit_page = BaseConfig.ITEMS_PER_PAGE
 
 
 class MovieDAO:
@@ -13,20 +16,19 @@ class MovieDAO:
         return self._db_session.query(Movie).filter(Movie.id == pk).one_or_none()
 
     def get_all(self):
-        data_filter = json.request
+        status = request.args.get('status')
+        page = request.args.get('page')
 
-        status = data_filter.get('status')
-        if status == 'new':
-            movies = self._db_session.query(Movie).order_by(Movie.id.desc())
+        if status == 'new' and page is not None:
+            page = int(page)
+            return self._db_session.query(Movie).order_by(desc(Movie.year)).limit(limit_page).offset(
+                limit_page * (page - 1))
 
-        page = data_filter.get('page')
+        elif status == 'new':
+            return self._db_session.query(Movie).order_by(desc(Movie.year))
 
-        if page is not None:
-            page_int = int(data_filter.get('page'))
-            movies = movies.paginate(page_int,
-                                     project.config.BaseConfig.ITEMS_PER_PAGE,
-                                     False).items
+        elif page is not None:
+            page = int(page)
+            return self._db_session.query(Movie).limit(limit_page).offset(limit_page * (page - 1))
 
-            return movies
-        else:
-            return movies.all()
+        return self._db_session.query(Movie).all()

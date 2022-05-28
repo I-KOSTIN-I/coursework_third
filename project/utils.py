@@ -13,12 +13,12 @@ def read_json(filename, encoding="utf-8"):
         return json.load(f)
 
 
-def get_hash(password):
+def get_hash(password,):
     return hashlib.pbkdf2_hmac(
         hash_name="sha256",
         password=password.encode("utf-8"),
-        salt=current_app.BaseConfig.PWD_HASH_SALT,
-        iterations=current_app.BaseConfig.PWD_HASH_ITERATIONS,
+        salt=BaseConfig.PWD_HASH_SALT,
+        iterations=BaseConfig.PWD_HASH_ITERATIONS,
     )
 
 
@@ -81,7 +81,7 @@ def auth_required(func):
 
         decoded_token = decode_token(token)
 
-        if not decoded_token['name']:
+        if not decoded_token['email']:
             abort(401)
 
         return func(*args, **kwargs)
