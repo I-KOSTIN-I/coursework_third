@@ -19,7 +19,7 @@ class AuthService(BaseService):
             abort(401, message='user not found')
 
         hashed_pass = get_hash(user_d['password'])
-        if user_data['password'] != hashed_pass:
+        if user_data.password != hashed_pass:
             abort(401, message='invalid credentials')
 
         tokens = generate_tokens(

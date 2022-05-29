@@ -13,7 +13,7 @@ def read_json(filename, encoding="utf-8"):
         return json.load(f)
 
 
-def get_hash(password,):
+def get_hash(password, ):
     return hashlib.pbkdf2_hmac(
         hash_name="sha256",
         password=password.encode("utf-8"),
@@ -55,16 +55,14 @@ def get_token_from_headers(headers: dict):
 
 
 def decode_token(token: str, refresh_token: bool = False):
-
     decoded_token = {}
-
     try:
         decoded_token = jwt.decode(
-            payload=token,
+            jwt=token,
             key=BaseConfig.SECRET_KEY,
-            algorithm=BaseConfig.JWT_ALGORITHM
+            algorithms=[BaseConfig.JWT_ALGORITHM],
         )
-    except jwt.PyJWTError as e:
+    except jwt.PyJWTError:
         current_app.logger.info('Got wrong token: "%s"', token)
         abort(401)
 
@@ -76,7 +74,6 @@ def decode_token(token: str, refresh_token: bool = False):
 
 def auth_required(func):
     def wrapper(*args, **kwargs):
-
         token = get_token_from_headers(request.headers)
 
         decoded_token = decode_token(token)
@@ -85,6 +82,7 @@ def auth_required(func):
             abort(401)
 
         return func(*args, **kwargs)
+
     return wrapper
 
 
@@ -102,9 +100,5 @@ def admin_access_required(func):
             abort(401)
 
         return func(*args, **kwargs)
+
     return wrapper
-
-
-
-
-
