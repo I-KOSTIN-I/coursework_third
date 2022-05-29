@@ -1,3 +1,4 @@
+import base64
 import json
 import hashlib
 from project.config import BaseConfig
@@ -13,13 +14,14 @@ def read_json(filename, encoding="utf-8"):
         return json.load(f)
 
 
-def get_hash(password, ):
-    return hashlib.pbkdf2_hmac(
+def get_hash(password):
+    hash_pass = hashlib.pbkdf2_hmac(
         hash_name="sha256",
         password=password.encode("utf-8"),
         salt=BaseConfig.PWD_HASH_SALT,
         iterations=BaseConfig.PWD_HASH_ITERATIONS,
     )
+    return base64.b64encode(hash_pass).decode('utf-8')
 
 
 def generate_tokens(user_d: dict) -> Dict[str, str]:
@@ -79,24 +81,6 @@ def auth_required(func):
         decoded_token = decode_token(token)
 
         if not decoded_token['email']:
-            abort(401)
-
-        return func(*args, **kwargs)
-
-    return wrapper
-
-
-def admin_access_required(func):
-    def wrapper(*args, **kwargs):
-
-        token = get_token_from_headers(request.headers)
-
-        decoded_token = decode_token(token)
-
-        if decoded_token['role'] != 'admin':
-            abort(403)
-
-        if not decoded_token['name']:
             abort(401)
 
         return func(*args, **kwargs)

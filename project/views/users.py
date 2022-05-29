@@ -4,6 +4,7 @@ from flask_restx import abort, Namespace, Resource
 from project.exceptions import ItemNotFound
 from project.services import UsersService
 from project.setup_db import db
+from project.utils import auth_required
 
 user_ns = Namespace("user")
 
@@ -12,6 +13,7 @@ user_ns = Namespace("user")
 @user_ns.response(404, "User not found")
 @user_ns.route("/<int:user_id>")
 class UserView(Resource):
+    @auth_required
     def get(self, user_id: int):
         """Получение информации о пользователе по его id"""
         try:
@@ -19,6 +21,7 @@ class UserView(Resource):
         except ItemNotFound:
             abort(404, message="User not found")
 
+    @auth_required
     def patch(self, user_id: int):
         """ изменяем информацию о пользователе через его id (кроме пароля)"""
         req_json = request.json
@@ -32,6 +35,7 @@ class UserView(Resource):
 @user_ns.response(404, "User not found")
 @user_ns.route("/password/<int:user_id>")
 class UserPswdView(Resource):
+    @auth_required
     def put(self, user_id: int):
         """ смена пароля пользоватя """
         req_json = request.json
